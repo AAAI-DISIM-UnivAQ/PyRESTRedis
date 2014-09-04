@@ -1,6 +1,13 @@
 #coding:utf-8
 '''
     PyRESTRedis A Python REST Interface to Redis key/value storage server
+ 
+ Licensed with Apache Public License
+ by AAAI Research Group
+ Department of Information Engineering and Computer Science and Mathematics
+ University of L'Aquila, ITALY
+ http://www.disim.univaq.it
+
 '''
 
 __author__ = 'giodegas'
