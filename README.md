@@ -46,3 +46,8 @@ you should have:
     {
     "available services": "/get, /set, /publish"
     }
+
+## Dependencies
+* [redis-py](http://github.com/andymccurdy/redis-py)
+* [Flask](http://flask.pocoo.org)
+* [FlaskRESTful](http://flask-restful.readthedocs.org)
