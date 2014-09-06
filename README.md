@@ -14,7 +14,7 @@ and try to set, get your keys and publish to your channels on port 8379:
 you should have:
 
     {
-    "available services": "/info, /get/.., /set/../.., /publish/../.., /keys/.."
+    "available services": "/info, /get/.., /set/../.., /exists/.., /publish/../.., /keys/.."
     }
 
 * to get information about the available Redis server: http://127.0.0.1:8379/info
@@ -33,6 +33,13 @@ you should have:
 
     {
     "get": "1"
+    }
+
+* to check if a key exists: http://127.0.0.1:8379/exists/mykey
+you should have:
+
+    {
+    "exists": true
     }
 
 * to publish data to a Redis channel: http://127.0.0.1:8379/publish/myChannel/myData
