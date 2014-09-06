@@ -49,7 +49,7 @@ if the channel exists, otherwise:
     "publish": 0
     }
 
-* to get a list of keys from a pattern: http://127.0.0.1:8379/keys/<pattern>
+* to get a list of keys from a pattern: http://127.0.0.1:8379/keys/_pattern_
 
 ## Dependencies
 * [redis-py](http://github.com/andymccurdy/redis-py)
