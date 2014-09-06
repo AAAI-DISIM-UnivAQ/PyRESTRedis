@@ -33,22 +33,11 @@ if the channel exists, otherwise:
 
 to get a list of keys from a pattern: http://127.0.0.1:8379/keys/_pattern_
 
-<<<<<<< HEAD
 other commands: sadd, smembers.
 
 All Redis commands with up to 3 arguments can be used with: http://127.0.0.1:8379/redis/_command_/_arg1_../_arg3_  
-    
-## Dependencies
-* [redis-py](http://github.com/andymccurdy/redis-py)
-* [Flask](http://flask.pocoo.org)
-* [FlaskRESTful](http://flask-restful.readthedocs.org)
-=======
-    {
-    "available services": "/get, /set, /publish"
-    }
 
 ## Dependencies
 * [redis-py](http://github.com/andymccurdy/redis-py)
 * [Flask](http://flask.pocoo.org)
 * [FlaskRESTful](http://flask-restful.readthedocs.org)
->>>>>>> e41c6060cffa009733f813afcdc9a0cdd9947c14
