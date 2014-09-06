@@ -23,7 +23,7 @@ REDIS_IP = '127.0.0.1'
 
 class ServiceDiscovery(Resource):
     def get(self):
-        return {'available services': '/get, /set, /publish'}
+        return {'available services': '/info, /get/.., /set/../.., /publish/../.., /keys/..'}
 
 class SetKey(Resource):
     def get(self, key_id, value):
@@ -36,6 +36,18 @@ class GetKey(Resource):
         global R
         out = R.get(key_id)
         return {'get': out}
+
+class Info(Resource):
+    def get(self):
+        global R
+        out = R.info()
+        return {'info': out}
+
+class Keys(Resource):
+    def get(self, keyPattern):
+        global R
+        out = R.keys(keyPattern)
+        return {'keys': out}
 
 class Publish(Resource):
     def get(self, channel_id, message):
@@ -53,6 +65,8 @@ if __name__ == '__main__':
     api.add_resource(SetKey, '/set/<string:key_id>/<string:value>')
     api.add_resource(GetKey, '/get/<string:key_id>')
     api.add_resource(Publish, '/publish/<string:channel_id>/<string:message>')
+    api.add_resource(Info, '/info')
+    api.add_resource(Keys, '/keys/<string:keyPattern>')
 
     R = Redis(REDIS_IP)
     print 'REST Interface from ',REDIS_IP, R.info()

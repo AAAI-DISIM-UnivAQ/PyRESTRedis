@@ -9,6 +9,16 @@ To use it, have [Redis](http://redis.io) server running, then run:
     
 and try to set, get your keys and publish to your channels on port 8379:
 
+* to know which services are available: http://127.0.0.1:8379
+    
+you should have:
+
+    {
+    "available services": "/info, /get/.., /set/../.., /publish/../.., /keys/.."
+    }
+
+* to get information about the available Redis server: http://127.0.0.1:8379/info
+
 * to set a key with its value: http://127.0.0.1:8379/set/mykey/1
 
 you should have:
@@ -39,10 +49,9 @@ if the channel exists, otherwise:
     "publish": 0
     }
 
-* to know which services are available: http://127.0.0.1:8379
-    
-you should have:
+* to get a list of keys from a pattern: http://127.0.0.1:8379/keys/<pattern>
 
-    {
-    "available services": "/get, /set, /publish"
-    }
+## Dependencies
+* [redis-py](http://github.com/andymccurdy/redis-py)
+* [Flask](http://flask.pocoo.org)
+* [FlaskRESTful](http://flask-restful.readthedocs.org)
