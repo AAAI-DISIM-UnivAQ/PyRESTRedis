@@ -26,7 +26,7 @@ api = restful.Api(app)
 
 class ServiceDiscovery(Resource):
     def get(self):
-        return {'SERVICES': '/info, /get/.., /set/../.., /exists/.., /publish/../.., /keys/.., /sadd/../.., /smembers/.., /redis....'}
+        return {'SERVICES': '/INFO, /GET/.., /SET/../.., /EXISTS/.., /PUBLISH/../.., /KEYS/.., /SADD/../.., /SMEMBERS/.., /redis....'}
 
 class SetKey(Resource):
     def get(self, key_id, value):

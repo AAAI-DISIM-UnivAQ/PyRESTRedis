@@ -11,19 +11,19 @@ and try Redis commands on port 8379:
 
 to know which services are available: http://127.0.0.1:8379
 
-    { "services": "/info, /get/.., /set/../.., /exists/.., /publish/../.., /keys/.., /sadd/../.., /smembers/.., /redis...." }
+    { "services": "/INFO, /GET/.., /SET/../.., /EXISTS/.., /PUBLISH/../.., /KEYS/.., /SADD/../.., /SMEMBERS/.., /redis...." }
 to get information about the available Redis server: http://127.0.0.1:8379/info
 
-to set a key with its value: http://127.0.0.1:8379/set/mykey/1
+to set a key with its value: http://127.0.0.1:8379/SET/mykey/1
 
     { "set": true }
-to read a key content: http://127.0.0.1:8379/get/mykey
+to read a key content: http://127.0.0.1:8379/GET/mykey
 
     { "get": "1" }
-to check if a key exists: http://127.0.0.1:8379/exists/mykey
+to check if a key exists: http://127.0.0.1:8379/EXISTS/mykey
 
     { "exists": true }
-to publish data to a Redis channel: http://127.0.0.1:8379/publish/myChannel/myData
+to publish data to a Redis channel: http://127.0.0.1:8379/PUBLISH/myChannel/myData
 
     { "publish": 1 }
 
@@ -31,7 +31,7 @@ if the channel exists, otherwise:
 
     { "publish": 0 }
 
-to get a list of keys from a pattern: http://127.0.0.1:8379/keys/_pattern_
+to get a list of keys from a pattern: http://127.0.0.1:8379/KEYS/_pattern_
 
 other commands: sadd, smembers.
 
