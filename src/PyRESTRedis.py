@@ -21,33 +21,36 @@ from redis import Redis
 SERVICE_PORT = 8379
 REDIS_IP = '127.0.0.1'
 
+app = Flask(__name__)
+api = restful.Api(app)
+
 class ServiceDiscovery(Resource):
     def get(self):
-        return {'services': '/info, /get/.., /set/../.., /exists/.., /publish/../.., /keys/.., /sadd/../.., /smembers/.., /redis....'}
+        return {'SERVICES': '/info, /get/.., /set/../.., /exists/.., /publish/../.., /keys/.., /sadd/../.., /smembers/.., /redis....'}
 
 class SetKey(Resource):
     def get(self, key_id, value):
         global R
         out = R.set(key_id, value)
-        return {'set': out}
+        return {'SET': out}
 
 class GetKey(Resource):
     def get(self, key_id):
         global R
         out = R.get(key_id)
-        return {'get': out}
+        return {'GET': out}
 
 class Info(Resource):
     def get(self):
         global R
         out = R.info()
-        return {'info': out}
+        return {'INFO': out}
 
 class Keys(Resource):
     def get(self, keyPattern):
         global R
         out = R.keys(keyPattern)
-        return {'keys': out}
+        return {'KEYS': out}
 
 class ExistsKey(Resource):
     def get(self, key_id):
@@ -59,19 +62,19 @@ class Sadd(Resource):
     def get(self, key_id, member):
         global R
         out = R.sadd(key_id, member)
-        return {'sadd': out}
+        return {'SADD': out}
 
 class Smembers(Resource):
     def get(self, key_id):
         global R
-        out = str(R.smembers(key_id))
-        return {'smembers': out}
+        out = list(R.smembers(key_id))
+        return {'SMEMBERS': out}
 
 class Publish(Resource):
     def get(self, channel_id, message):
         global R
         out = R.publish(channel_id, message)
-        return {'publish': out}
+        return {'PUBLISH': out}
 
 class Generic(Resource):
     def get(self, cmd, param1=None, param2=None, param3=None):
@@ -86,30 +89,44 @@ class Generic(Resource):
         cmdStr += ')'
         print 'executing..', cmdStr
         out = eval(cmdStr)
-        return {cmd: out}
+        return {cmd.upper(): out}
 
 # ------------------------------------------------------------
 
-if __name__ == '__main__':
-    app = Flask(__name__)
-    api = restful.Api(app)
+@app.after_request
+def after_request(response):
+    # to allow to serve pages from the same server, different  port
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+    response.headers['Access-Control-Allow-Headers'] = "Origin, X-Requested-With,Content-Type, Accept"
+    return response
 
-    api.add_resource(ServiceDiscovery, '/')
-    api.add_resource(SetKey, '/set/<string:key_id>/<string:value>')
-    api.add_resource(GetKey, '/get/<string:key_id>')
-    api.add_resource(Publish, '/publish/<string:channel_id>/<string:message>')
-    api.add_resource(Info, '/info')
-    api.add_resource(Keys, '/keys/<string:keyPattern>')
-    api.add_resource(ExistsKey, '/exists/<string:key_id>')
-    api.add_resource(Sadd, '/sadd/<string:key_id>/<string:member>')
-    api.add_resource(Smembers, '/smembers/<string:key_id>')
-    # All other Redis command with up to 3 arguments
+def addCommand(function, command, arguments=None):
+    # add a service twice , lower and upper case
+    global api
+    urlStrUC = command.upper()
+    urlStrLC = command.lower()
+    if arguments:
+        urlStrUC += '/' + arguments
+        urlStrLC += '/' + arguments
+    api.add_resource(function, urlStrLC, urlStrUC)
+
+if __name__ == '__main__':
+    addCommand(ServiceDiscovery, '/')
+    addCommand(SetKey, '/set', '<string:key_id>/<string:value>')
+    addCommand(GetKey, '/get','<string:key_id>')
+    addCommand(Publish, '/publish','<string:channel_id>/<string:message>')
+    addCommand(Info, '/info')
+    addCommand(Keys, '/keys','<string:keyPattern>')
+    addCommand(ExistsKey, '/exists','<string:key_id>')
+    addCommand(Sadd, '/sadd','<string:key_id>/<string:member>')
+    addCommand(Smembers, '/smembers','<string:key_id>')
+
+    # All other Redis command with up to 3 arguments, all lower case
     api.add_resource(Generic, '/redis/<string:cmd>',
                      '/redis/<string:cmd>/<string:param1>',
                      '/redis/<string:cmd>/<string:param1>/<string:param2>',
                      '/redis/<string:cmd>/<string:param1>/<string:param2>/<string:param3>')
 
     R = Redis(REDIS_IP)
-    print 'REST Interface from ',REDIS_IP, R.info()
 
     app.run(debug=True, port=SERVICE_PORT)
