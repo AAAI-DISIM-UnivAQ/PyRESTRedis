@@ -76,6 +76,12 @@ class Publish(Resource):
         out = R.publish(channel_id, message)
         return {'PUBLISH': out}
 
+class LIndex(Resource):
+    def get(self, key_id, index):
+        global R
+        out = R.lindex(key_id, index)
+        return {'LINDEX': out}
+
 class Generic(Resource):
     def get(self, cmd, param1=None, param2=None, param3=None):
         global R
@@ -120,6 +126,7 @@ if __name__ == '__main__':
     addCommand(ExistsKey, '/exists','<string:key_id>')
     addCommand(Sadd, '/sadd','<string:key_id>/<string:member>')
     addCommand(Smembers, '/smembers','<string:key_id>')
+    addCommand(LIndex, '/lindex', '<string:key_id>/<string:index>')
 
     # All other Redis command with up to 3 arguments, all lower case
     api.add_resource(Generic, '/redis/<string:cmd>',
