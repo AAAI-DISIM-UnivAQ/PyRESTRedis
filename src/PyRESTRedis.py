@@ -56,7 +56,7 @@ class ExistsKey(Resource):
     def get(self, key_id):
         global R
         out = R.exists(key_id)
-        return {'exists': out}
+        return {'EXISTS': out}
 
 class Sadd(Resource):
     def get(self, key_id, member):
