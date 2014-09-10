@@ -15,6 +15,7 @@ __author__ = 'giodegas'
 from flask import Flask
 from flask.ext import restful
 from flask.ext.restful import Resource
+from json import dumps
 
 from redis import Redis
 
@@ -26,7 +27,7 @@ api = restful.Api(app)
 
 class ServiceDiscovery(Resource):
     def get(self):
-        return {'SERVICES': '/INFO, /GET/.., /SET/../.., /EXISTS/.., /PUBLISH/../.., /KEYS/.., /SADD/../.., /SMEMBERS/.., /redis....'}
+        return {'REDIS SERVICES': 'INFO, GET, SET, EXISTS, PUBLISH, KEYS, SADD, SMEMBERS, HSET, HGET, HGETALL, /redis....'}
 
 class SetKey(Resource):
     def get(self, key_id, value):
@@ -74,13 +75,31 @@ class Publish(Resource):
     def get(self, channel_id, message):
         global R
         out = R.publish(channel_id, message)
-        return {'PUBLISH': out}
+        return dumps({'PUBLISH': out})
 
 class LIndex(Resource):
     def get(self, key_id, index):
         global R
         out = R.lindex(key_id, index)
         return {'LINDEX': out}
+
+class HSet(Resource):
+    def get(self, key_id, field, value):
+        global R
+        out = R.hset(key_id, field, value)
+        return {'HSET': out}
+
+class HGet(Resource):
+    def get(self, key_id, field):
+        global R
+        out = R.hget(key_id, field)
+        return {'HGET': out}
+
+class HGetAll(Resource):
+    def get(self, key_id):
+        global R
+        out = R.hgetall(key_id)
+        return {'HGETALL': out}
 
 class Generic(Resource):
     def get(self, cmd, param1=None, param2=None, param3=None):
@@ -104,6 +123,7 @@ def after_request(response):
     # to allow to serve pages from the same server, different  port
     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5000'
     response.headers['Access-Control-Allow-Headers'] = "Origin, X-Requested-With,Content-Type, Accept"
+    response.headers['Cache-Control'] = 'no-cache'
     return response
 
 def addCommand(function, command, arguments=None):
@@ -127,6 +147,9 @@ if __name__ == '__main__':
     addCommand(Sadd, '/sadd','<string:key_id>/<string:member>')
     addCommand(Smembers, '/smembers','<string:key_id>')
     addCommand(LIndex, '/lindex', '<string:key_id>/<string:index>')
+    addCommand(HSet, '/hset', '<string:key_id>/<string:field>/<string:value>')
+    addCommand(HGet, '/hget', '<string:key_id>/<string:field>')
+    addCommand(HGetAll, '/hgetall', '<string:key_id>')
 
     # All other Redis command with up to 3 arguments, all lower case
     api.add_resource(Generic, '/redis/<string:cmd>',
