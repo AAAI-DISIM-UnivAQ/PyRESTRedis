@@ -21,13 +21,14 @@ from redis import Redis
 
 SERVICE_PORT = 8379
 REDIS_IP = '127.0.0.1'
+HOST_IP = '0.0.0.0'
 
 app = Flask(__name__)
 api = restful.Api(app)
 
 class ServiceDiscovery(Resource):
     def get(self):
-        return {'REDIS SERVICES': 'INFO, GET, SET, DEL, EXISTS, PUBLISH, KEYS, SADD, SMEMBERS, SREM, HSET, HGET, HGETALL, /redis....'}
+        return {'REDIS SERVICES': 'INFO, GET, SET, DEL, EXISTS, PUBLISH, KEYS, SADD, SMEMBERS, SREM, HSET, HGET, HGETALL, LPOP, SELECT, /redis....'}
 
 class SetKey(Resource):
     def get(self, key_id, value):
@@ -99,7 +100,7 @@ class HGet(Resource):
     def get(self, key_id, field):
         global R
         out = R.hget(key_id, field)
-        if len(out)>1000000:
+        if out and len(out)>1000000:
             print 'oversized response'
             out = False
         return {'HGET': out}
@@ -122,6 +123,12 @@ class SetMemberRemove(Resource):
         out = R.srem(set_name, member)
         return {'SREM': out}
 
+class LPop(Resource):
+    def get(self, listName):
+        global R
+        out = R.lpop(listName)
+        return {'LPOP': out}
+
 class Generic(Resource):
     def get(self, cmd, param1=None, param2=None, param3=None):
         global R
@@ -137,6 +144,13 @@ class Generic(Resource):
         out = eval(cmdStr)
         return {cmd.upper(): out}
 
+class DBSelect(Resource):
+    def get(self, dbNum):
+        global R
+        R = None
+        R = Redis(db=dbNum)
+        out = 'ok'
+        return {'SELECT': out}
 # ------------------------------------------------------------
 
 @app.after_request
@@ -176,6 +190,8 @@ if __name__ == '__main__':
     addCommand(HExists, '/hexists', '<string:key_id>/<string:field>')
     addCommand(DelKey, '/del', '<string:key_id>')
     addCommand(SetMemberRemove, '/srem', '<string:set_name>/<string:member>')
+    addCommand(LPop, '/lpop', '<string:listName>')
+    addCommand(DBSelect, '/select', '<int:dbNum>')
 
     # All other Redis command with up to 3 arguments, all lower case
     api.add_resource(Generic, '/redis/<string:cmd>',
@@ -183,4 +199,4 @@ if __name__ == '__main__':
                      '/redis/<string:cmd>/<string:param1>/<string:param2>',
                      '/redis/<string:cmd>/<string:param1>/<string:param2>/<string:param3>')
 
-    app.run(debug=True, port=SERVICE_PORT)
+    app.run(debug=True, port=SERVICE_PORT, host=HOST_IP)
