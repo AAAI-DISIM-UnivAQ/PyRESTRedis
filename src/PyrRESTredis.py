@@ -20,8 +20,8 @@ from json import dumps
 from redis import Redis
 
 SERVICE_PORT = 8379
-REDIS_IP = '127.0.0.1'
-HOST_IP = '0.0.0.0'
+REDIS_IP = 'localhost'
+HOST_IP = 'localhost'
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -100,10 +100,16 @@ class HGet(Resource):
     def get(self, key_id, field):
         global R
         out = R.hget(key_id, field)
-        if out and len(out)>1000000:
+        if out and len(out)>4000000:
             print 'oversized response'
             out = False
         return {'HGET': out}
+
+class HDel(Resource):
+    def get(self, key_id, field):
+        global R
+        out = R.hdel(key_id, field)
+        return {'HDEL': out}
 
 class HExists(Resource):
     def get(self, key_id, field):
@@ -151,6 +157,16 @@ class DBSelect(Resource):
         R = Redis(db=dbNum)
         out = 'ok'
         return {'SELECT': out}
+
+class FlushDB(Resource):
+    def get(self, password):
+        global R
+        if password=='_password_':
+            out = R.flushdb()
+            return {'FLUSHDB': out}
+        else:
+            return {'FLUSHDB': False}
+
 # ------------------------------------------------------------
 
 @app.after_request
@@ -186,12 +202,14 @@ if __name__ == '__main__':
     addCommand(LIndex, '/lindex', '<string:key_id>/<string:index>')
     addCommand(HSet, '/hset', '<string:key_id>/<string:field>/<string:value>')
     addCommand(HGet, '/hget', '<string:key_id>/<string:field>')
+    addCommand(HDel, '/hdel', '<string:key_id>/<string:field>')
     addCommand(HGetAll, '/hgetall', '<string:key_id>')
     addCommand(HExists, '/hexists', '<string:key_id>/<string:field>')
     addCommand(DelKey, '/del', '<string:key_id>')
     addCommand(SetMemberRemove, '/srem', '<string:set_name>/<string:member>')
     addCommand(LPop, '/lpop', '<string:listName>')
     addCommand(DBSelect, '/select', '<int:dbNum>')
+    addCommand(FlushDB, '/flushdb', '<string:password>')
 
     # All other Redis command with up to 3 arguments, all lower case
     api.add_resource(Generic, '/redis/<string:cmd>',
