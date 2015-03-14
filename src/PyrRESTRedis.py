@@ -20,14 +20,15 @@ from json import dumps
 from redis import Redis
 
 SERVICE_PORT = 8379
-REDIS_IP = '127.0.0.1'
+REDIS_IP = 'localhost'
+HOST_IP = 'localhost'
 
 app = Flask(__name__)
 api = restful.Api(app)
 
 class ServiceDiscovery(Resource):
     def get(self):
-        return {'REDIS SERVICES': 'INFO, GET, SET, EXISTS, PUBLISH, KEYS, SADD, SMEMBERS, HSET, HGET, HGETALL, /redis....'}
+        return {'REDIS SERVICES': 'INFO, GET, SET, DEL, EXISTS, PUBLISH, KEYS, SADD, SMEMBERS, SREM, HSET, HGET, HGETALL, LPOP, SELECT, /redis....'}
 
 class SetKey(Resource):
     def get(self, key_id, value):
@@ -40,6 +41,12 @@ class GetKey(Resource):
         global R
         out = R.get(key_id)
         return {'GET': out}
+
+class DelKey(Resource):
+    def get(self, key_id):
+        global R
+        out = R.delete(key_id)
+        return {'DEL': out}
 
 class Info(Resource):
     def get(self):
@@ -93,13 +100,40 @@ class HGet(Resource):
     def get(self, key_id, field):
         global R
         out = R.hget(key_id, field)
+        if out and len(out)>4000000:
+            print 'oversized response'
+            out = False
         return {'HGET': out}
+
+class HDel(Resource):
+    def get(self, key_id, field):
+        global R
+        out = R.hdel(key_id, field)
+        return {'HDEL': out}
+
+class HExists(Resource):
+    def get(self, key_id, field):
+        global R
+        out = R.hexists(key_id, field)
+        return {'HEXISTS': out}
 
 class HGetAll(Resource):
     def get(self, key_id):
         global R
         out = R.hgetall(key_id)
         return {'HGETALL': out}
+
+class SetMemberRemove(Resource):
+    def get(self, set_name, member):
+        global R
+        out = R.srem(set_name, member)
+        return {'SREM': out}
+
+class LPop(Resource):
+    def get(self, listName):
+        global R
+        out = R.lpop(listName)
+        return {'LPOP': out}
 
 class Generic(Resource):
     def get(self, cmd, param1=None, param2=None, param3=None):
@@ -115,6 +149,23 @@ class Generic(Resource):
         print 'executing..', cmdStr
         out = eval(cmdStr)
         return {cmd.upper(): out}
+
+class DBSelect(Resource):
+    def get(self, dbNum):
+        global R
+        R = None
+        R = Redis(db=dbNum)
+        out = 'ok'
+        return {'SELECT': out}
+
+class FlushDB(Resource):
+    def get(self, password):
+        global R
+        if password=='_password_':
+            out = R.flushdb()
+            return {'FLUSHDB': out}
+        else:
+            return {'FLUSHDB': False}
 
 # ------------------------------------------------------------
 
@@ -137,6 +188,8 @@ def addCommand(function, command, arguments=None):
     api.add_resource(function, urlStrLC, urlStrUC)
 
 if __name__ == '__main__':
+    R = Redis(REDIS_IP)
+
     addCommand(ServiceDiscovery, '/')
     addCommand(SetKey, '/set', '<string:key_id>/<string:value>')
     addCommand(GetKey, '/get','<string:key_id>')
@@ -149,7 +202,14 @@ if __name__ == '__main__':
     addCommand(LIndex, '/lindex', '<string:key_id>/<string:index>')
     addCommand(HSet, '/hset', '<string:key_id>/<string:field>/<string:value>')
     addCommand(HGet, '/hget', '<string:key_id>/<string:field>')
+    addCommand(HDel, '/hdel', '<string:key_id>/<string:field>')
     addCommand(HGetAll, '/hgetall', '<string:key_id>')
+    addCommand(HExists, '/hexists', '<string:key_id>/<string:field>')
+    addCommand(DelKey, '/del', '<string:key_id>')
+    addCommand(SetMemberRemove, '/srem', '<string:set_name>/<string:member>')
+    addCommand(LPop, '/lpop', '<string:listName>')
+    addCommand(DBSelect, '/select', '<int:dbNum>')
+    addCommand(FlushDB, '/flushdb', '<string:password>')
 
     # All other Redis command with up to 3 arguments, all lower case
     api.add_resource(Generic, '/redis/<string:cmd>',
@@ -157,6 +217,4 @@ if __name__ == '__main__':
                      '/redis/<string:cmd>/<string:param1>/<string:param2>',
                      '/redis/<string:cmd>/<string:param1>/<string:param2>/<string:param3>')
 
-    R = Redis(REDIS_IP)
-
-    app.run(debug=True, port=SERVICE_PORT)
+    app.run(debug=True, port=SERVICE_PORT, host=HOST_IP)
