@@ -1,7 +1,7 @@
 PyRESTRedis
 ===========
 
-Python Flask REST simplified interface to Redis
+Python RESTful simplified interface to Redis
 
 To use it, have [Redis](http://redis.io) server running, then run:
 
