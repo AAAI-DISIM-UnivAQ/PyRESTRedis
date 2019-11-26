@@ -101,7 +101,6 @@ class HGet(Resource):
         global R
         out = R.hget(key_id, field)
         if out and len(out)>4000000:
-            print 'oversized response'
             out = False
         return {'HGET': out}
 
@@ -146,7 +145,6 @@ class Generic(Resource):
                 if param3:
                     cmdStr += ",'"+param3+"'"
         cmdStr += ')'
-        print 'executing..', cmdStr
         out = eval(cmdStr)
         return {cmd.upper(): out}
 
