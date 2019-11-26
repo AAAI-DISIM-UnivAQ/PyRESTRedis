@@ -1,0 +1,3 @@
+redis-py
+flask
+flask-restful
