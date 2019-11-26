@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pyReestRedis',
-    packages=['pyrestredis'],
+    packages=['src'],
     version='0.2',
     description='Python RESTful simplified interface to Redis',
     url='https://github.com/AAAI-DISIM-UnivAQ/PyRESTRedis',
