@@ -17,7 +17,7 @@ from flask_restful import *
 from flask_restful import Resource
 from json import dumps
 
-from redis import Redis
+from redis import StrictRedis
 
 SERVICE_PORT = 8379
 REDIS_IP = 'localhost'
@@ -186,8 +186,7 @@ def addCommand(function, command, arguments=None):
     api.add_resource(function, urlStrLC, urlStrUC)
 
 if __name__ == '__main__':
-    R = Redis(REDIS_IP, encoding='utf-8')
-
+    R = StrictRedis(REDIS_IP, 6379, charset="utf-8", decode_responses=True)
     addCommand(ServiceDiscovery, '/')
     addCommand(SetKey, '/set', '<string:key_id>/<string:value>')
     addCommand(GetKey, '/get','<string:key_id>')
