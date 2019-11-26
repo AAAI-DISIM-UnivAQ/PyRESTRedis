@@ -186,7 +186,7 @@ def addCommand(function, command, arguments=None):
     api.add_resource(function, urlStrLC, urlStrUC)
 
 if __name__ == '__main__':
-    R = Redis(REDIS_IP)
+    R = Redis(REDIS_IP, encoding='utf-8')
 
     addCommand(ServiceDiscovery, '/')
     addCommand(SetKey, '/set', '<string:key_id>/<string:value>')
