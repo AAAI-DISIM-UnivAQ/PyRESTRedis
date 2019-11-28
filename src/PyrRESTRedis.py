@@ -13,8 +13,7 @@
 __author__ = 'giodegas'
 
 from flask import Flask, request
-from flask_restful import *
-from flask_restful import reqparse, abort, Api, Resource
+from flask_restful import reqparse, Api, Resource
 from json import dumps
 from redis import StrictRedis
 
@@ -25,8 +24,6 @@ HOST_IP = 'localhost'
 app = Flask(__name__)
 api = Api(app)
 
-parser = reqparse.RequestParser()
-# parser.add_argument('task')
 
 class ServiceDiscovery(Resource):
     def get(self):
@@ -39,14 +36,6 @@ class SetKey(Resource):
         out = R.set(key_id, value)
         return {'SET': out}
 
-
-class SetKeyPost(Resource):
-    def post(self):
-        parser.add_argument('key_id', type=str)
-        parser.add_argument('data', type=str)
-        args = parser.parse_args()
-        out = R.set(args[0], args[1])
-        return {'SET': out}
 
 
 class GetKey(Resource):
